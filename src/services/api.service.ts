@@ -218,7 +218,7 @@ class AuthService {
 class ContactService {
   async submitContact(formData: ContactFormData): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await apiClient.post<{ success: boolean; message: string }>('contact', formData);
+      const response = await apiClient.post<{ success: boolean; message: string }>('contacts', formData);
       return response.data;
     } catch (error) {
       console.error('Contact form error:', error);
