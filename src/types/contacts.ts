@@ -10,8 +10,8 @@ export interface Contact {
   assigned_to?: number;
   assigned_username?: string;
   notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ContactResponse {

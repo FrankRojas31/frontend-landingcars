@@ -13,6 +13,28 @@ export default function MessagesManagement() {
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  const formatDateTime = (dateString: string) => {
+    try {
+      if (!dateString) return "Fecha no disponible";
+
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return "Fecha inválida";
+      }
+
+      return date.toLocaleString("es-MX", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Fecha inválida";
+    }
+  };
+
   useEffect(() => {
     loadContacts();
     loadUnreadCount();
@@ -33,7 +55,7 @@ export default function MessagesManagement() {
         currentUser?.role === "admin"
           ? await contactService.getContacts()
           : await contactService.getMyContacts();
-      
+
       // Extraer los contactos de la respuesta
       const contactsData = response.data || [];
       setContacts(contactsData);
@@ -213,9 +235,7 @@ export default function MessagesManagement() {
                         <p className="text-gray-900">{message.content}</p>
                         <div className="flex justify-between items-center mt-2">
                           <span className="text-xs text-gray-500">
-                            {new Date(message.createdAt).toLocaleString(
-                              "es-MX"
-                            )}
+                            {formatDateTime(message.createdAt)}
                           </span>
                           {!message.isRead && (
                             <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">

@@ -28,6 +28,26 @@ export default function UsersManagement() {
     loadUsers();
   }, []);
 
+  const formatDate = (dateString?: string) => {
+    try {
+      if (!dateString) return "N/A";
+
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return "Fecha inválida";
+      }
+
+      return date.toLocaleDateString("es-MX", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Fecha inválida";
+    }
+  };
+
   const loadUsers = async () => {
     try {
       setLoading(true);
@@ -342,9 +362,7 @@ export default function UsersManagement() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {user.created_at
-                        ? new Date(user.created_at).toLocaleDateString("es-MX")
-                        : "N/A"}
+                      {formatDate(user.created_at)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <button
