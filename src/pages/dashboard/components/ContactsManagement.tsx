@@ -11,8 +11,18 @@ export default function ContactsManagement() {
   const [loading, setLoading] = useState(true);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [followUpMessage, setFollowUpMessage] = useState("");
-  const [showFollowUpModal, setShowFollowUpModal] = useState(false);
+  const [showPriorityModal, setShowPriorityModal] = useState(false);
+  const [selectedPriority, setSelectedPriority] = useState<string>("");
+
+  // Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
+  // Cálculos para paginación
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentContacts = contacts.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(contacts.length / itemsPerPage);
 
   const loadContacts = useCallback(async () => {
     try {
@@ -25,6 +35,14 @@ export default function ContactsManagement() {
       // Extraer los contactos de la respuesta
       const contactsData = response.data || [];
       setContacts(contactsData);
+
+      // Resetear la página actual si no hay contactos para mostrar
+      if (
+        contactsData.length <= (currentPage - 1) * itemsPerPage &&
+        currentPage > 1
+      ) {
+        setCurrentPage(1);
+      }
     } catch (error) {
       console.error("Error loading contacts:", error);
       Swal.fire({
@@ -35,7 +53,7 @@ export default function ContactsManagement() {
     } finally {
       setLoading(false);
     }
-  }, [currentUser?.role]);
+  }, [currentUser?.role, currentPage, itemsPerPage]);
 
   const loadUsers = useCallback(async () => {
     if (currentUser?.role === "admin") {
@@ -76,28 +94,29 @@ export default function ContactsManagement() {
     }
   };
 
-  const handleSendFollowUp = async () => {
-    if (!selectedContact || !followUpMessage.trim()) return;
+  const handleUpdatePriority = async () => {
+    if (!selectedContact || !selectedPriority) return;
 
     try {
-      await contactService.sendFollowUpEmail(
-        selectedContact.id,
-        followUpMessage
-      );
+      await contactService.updateContact(selectedContact.id, {
+        priority: selectedPriority,
+      });
+
       Swal.fire({
         icon: "success",
-        title: "¡Enviado!",
-        text: "Email de seguimiento enviado correctamente",
+        title: "¡Actualizado!",
+        text: "Prioridad actualizada correctamente",
       });
-      setShowFollowUpModal(false);
+      setShowPriorityModal(false);
       setSelectedContact(null);
-      setFollowUpMessage("");
+      setSelectedPriority("");
+      loadContacts(); // Recargar para ver los cambios
     } catch (error) {
-      console.error("Error sending follow up:", error);
+      console.error("Error updating priority:", error);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "No se pudo enviar el email de seguimiento",
+        text: "No se pudo actualizar la prioridad",
       });
     }
   };
@@ -132,25 +151,6 @@ export default function ContactsManagement() {
         });
       }
     }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: { text: "Pendiente", class: "bg-yellow-100 text-yellow-800" },
-      in_progress: { text: "En Progreso", class: "bg-blue-100 text-blue-800" },
-      completed: { text: "Completado", class: "bg-green-100 text-green-800" },
-    };
-
-    const config =
-      statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
-
-    return (
-      <span
-        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${config.class}`}
-      >
-        {config.text}
-      </span>
-    );
   };
 
   return (
@@ -197,10 +197,7 @@ export default function ContactsManagement() {
                     Mensaje
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Asignado a
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
+                    Prioridad
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Fecha
@@ -211,7 +208,7 @@ export default function ContactsManagement() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {contacts.map((contact) => (
+                {currentContacts.map((contact) => (
                   <tr key={contact.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
@@ -231,37 +228,43 @@ export default function ContactsManagement() {
                         {contact.message}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {contact.assigned_username || "Sin asignar"}
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(contact.status)}
+                      <select
+                        value={contact.priority}
+                        onChange={async (e) => {
+                          const newPriority = e.target.value;
+                          try {
+                            await contactService.updateContact(contact.id, {
+                              priority: newPriority,
+                            });
+                            loadContacts();
+                          } catch (error) {
+                            console.error("Error updating priority:", error);
+                            Swal.fire({
+                              icon: "error",
+                              title: "Error",
+                              text: "No se pudo actualizar la prioridad",
+                            });
+                          }
+                        }}
+                        className={`text-xs px-2 py-1 rounded-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold ${
+                          contact.priority === "low"
+                            ? "bg-gray-100 text-gray-800"
+                            : contact.priority === "medium"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        <option value="low">🔵 Baja</option>
+                        <option value="medium">🟡 Media</option>
+                        <option value="high">🔴 Alta</option>
+                      </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(contact.created_at).toLocaleDateString("es-MX")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        {currentUser?.role === "admin" && (
-                          <button
-                            onClick={() => {
-                              setSelectedContact(contact);
-                              setShowAssignModal(true);
-                            }}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Asignar
-                          </button>
-                        )}
-                        <button
-                          onClick={() => {
-                            setSelectedContact(contact);
-                            setShowFollowUpModal(true);
-                          }}
-                          className="text-green-600 hover:text-green-900"
-                        >
-                          Seguimiento
-                        </button>
                         {(currentUser?.role === "admin" ||
                           contact.assigned_to === currentUser?.id) && (
                           <button
@@ -285,11 +288,58 @@ export default function ContactsManagement() {
             )}
           </div>
         )}
+
+        {/* Paginación */}
+        {!loading && contacts.length > 0 && (
+          <div className="px-6 py-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                Mostrando {indexOfFirstItem + 1} a{" "}
+                {Math.min(indexOfLastItem, contacts.length)} de{" "}
+                {contacts.length} contactos
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Anterior
+                </button>
+
+                {/* Números de página */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 text-sm rounded-md ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+
+                <button
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal de asignación */}
       {showAssignModal && selectedContact && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Asignar Contacto: {selectedContact.fullName}
@@ -321,33 +371,65 @@ export default function ContactsManagement() {
         </div>
       )}
 
-      {/* Modal de seguimiento */}
-      {showFollowUpModal && selectedContact && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      {/* Modal de prioridad */}
+      {showPriorityModal && selectedContact && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Enviar Seguimiento: {selectedContact.fullName}
+              Cambiar Prioridad: {selectedContact.fullName}
             </h3>
-            <textarea
-              value={followUpMessage}
-              onChange={(e) => setFollowUpMessage(e.target.value)}
-              placeholder="Escribe tu mensaje de seguimiento..."
-              rows={4}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="mt-6 flex space-x-3">
+
+            {/* Selector de prioridad */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Seleccionar Prioridad:
+              </label>
+              <select
+                value={selectedPriority}
+                onChange={(e) => setSelectedPriority(e.target.value)}
+                className={`w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold ${
+                  selectedPriority === "low"
+                    ? "bg-gray-50 text-gray-800"
+                    : selectedPriority === "medium"
+                      ? "bg-yellow-50 text-yellow-800"
+                      : selectedPriority === "high"
+                        ? "bg-red-50 text-red-800"
+                        : "bg-white text-gray-900"
+                }`}
+              >
+                <option value="low" className="bg-gray-50 text-gray-800">
+                  🔵 Baja
+                </option>
+                <option value="medium" className="bg-yellow-50 text-yellow-800">
+                  🟡 Media
+                </option>
+                <option value="high" className="bg-red-50 text-red-800">
+                  🔴 Alta
+                </option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Prioridad actual:{" "}
+                {selectedContact.priority === "low"
+                  ? "Baja"
+                  : selectedContact.priority === "medium"
+                    ? "Media"
+                    : "Alta"}
+              </p>
+            </div>
+
+            <div className="flex space-x-3">
               <button
-                onClick={handleSendFollowUp}
-                disabled={!followUpMessage.trim()}
+                onClick={handleUpdatePriority}
+                disabled={selectedPriority === selectedContact.priority}
                 className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300"
               >
-                Enviar
+                Actualizar
               </button>
               <button
                 onClick={() => {
-                  setShowFollowUpModal(false);
+                  setShowPriorityModal(false);
                   setSelectedContact(null);
-                  setFollowUpMessage("");
+                  setSelectedPriority("");
                 }}
                 className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
               >

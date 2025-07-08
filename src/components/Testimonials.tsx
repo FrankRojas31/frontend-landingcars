@@ -23,7 +23,7 @@ const Testimonials = () => {
         "Como mujer en el sector construcción, necesitaba vehículos confiables y potentes. Titan Motors me ofreció exactamente lo que buscaba con un servicio personalizado increíble.",
       rating: 5,
       image:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b17c?w=400&h=400&fit=crop&crop=face",
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
     },
     {
       id: 3,
