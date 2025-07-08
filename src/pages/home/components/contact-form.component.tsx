@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
+import { Link } from "react-router";
 import { contactService } from "../../../services/api.service";
 import Swal from "sweetalert2";
 
@@ -244,13 +245,16 @@ export default function ContactFormComponent() {
             <label htmlFor="condiciones" className="ml-2">
               Acepto los{" "}
             </label>
-            <a href="/terminos" className="enlace-terminos text-blue-400">
+            <Link
+              to="/terminos-condiciones"
+              className="enlace-terminos text-blue-400"
+            >
               Términos y Condiciones
-            </a>
+            </Link>
             {" y "}
-            <a href="/aviso" className="text-blue-400">
+            <Link to="/aviso-privacidad" className="text-blue-400">
               Aviso de Privacidad
-            </a>
+            </Link>
             {touched.condiciones && errors.condiciones && (
               <div className="text-red-500 text-sm mt-2">
                 Debes aceptar los términos y condiciones.
