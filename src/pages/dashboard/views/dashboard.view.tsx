@@ -5,8 +5,6 @@ import {
   Users,
   Car,
   TrendingUp,
-  Calendar,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -17,7 +15,6 @@ import {
   Plus,
   UserCheck,
   MessageSquare,
-  UserPlus,
 } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
 import { Link, useNavigate } from "react-router";
