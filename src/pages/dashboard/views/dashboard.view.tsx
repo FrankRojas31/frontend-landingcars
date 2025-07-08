@@ -162,14 +162,6 @@ const DashboardView = () => {
     { id: "overview", label: "Resumen", icon: BarChart3 },
     { id: "contacts", label: "Contactos", icon: MessageSquare },
     { id: "messages", label: "Mensajes", icon: Bell },
-    ...(user?.role === "admin"
-      ? [{ id: "users", label: "Usuarios", icon: UserPlus }]
-      : []),
-    { id: "vehicles", label: "Vehículos", icon: Car },
-    { id: "customers", label: "Clientes", icon: Users },
-    { id: "sales", label: "Ventas", icon: TrendingUp },
-    { id: "calendar", label: "Calendario", icon: Calendar },
-    { id: "settings", label: "Configuración", icon: Settings },
   ];
 
   const renderContent = () => {
