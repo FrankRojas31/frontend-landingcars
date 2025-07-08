@@ -34,8 +34,13 @@ export default function ContactFormComponent() {
   const [touched, setTouched] = useState<TouchedFields>({});
 
   const errors = {
-    fullName: !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(form.fullName) || form.fullName.trim().length < 3 || form.fullName.length > 100,
-    email: !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(form.email) || form.email.length > 70,
+    fullName:
+      !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(form.fullName) ||
+      form.fullName.trim().length < 3 ||
+      form.fullName.length > 100,
+    email:
+      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(form.email) ||
+      form.email.length > 70,
     phone: !/^\d{10}$/.test(form.phone),
     message: form.message.trim().length < 10 || form.message.length > 1000,
     condiciones: !form.condiciones,
@@ -103,7 +108,7 @@ export default function ContactFormComponent() {
           email: sanitizeInput(form.email),
           phone: sanitizeInput(form.phone),
           message: sanitizeInput(form.message),
-          recaptcha: form.recaptcha, 
+          recaptcha: form.recaptcha,
         };
 
         await contactService.submitContact(sanitizedForm);
@@ -176,7 +181,8 @@ export default function ContactFormComponent() {
             />
             {touched.fullName && errors.fullName && (
               <div className="text-red-500 text-sm mt-2">
-                El nombre debe tener entre 3 y 100 caracteres, solo letras y espacios.
+                El nombre debe tener entre 3 y 100 caracteres, solo letras y
+                espacios.
               </div>
             )}
           </div>
@@ -227,7 +233,8 @@ export default function ContactFormComponent() {
             />
             {touched.phone && errors.phone && (
               <div className="text-red-500 text-sm mt-2">
-                Ingresa un teléfono válido (exactamente 10 dígitos, solo números).
+                Ingresa un teléfono válido (exactamente 10 dígitos, solo
+                números).
               </div>
             )}
           </div>
@@ -267,11 +274,14 @@ export default function ContactFormComponent() {
             />
             <label htmlFor="condiciones" className="ml-2">
               Acepto los{" "}
-              <a href="/terminos" className="enlace-terminos text-blue-400">
+              <a
+                href="/terminos-condiciones"
+                className="enlace-terminos text-blue-400"
+              >
                 Términos y Condiciones
               </a>{" "}
               y{" "}
-              <a href="/aviso" className="text-blue-400">
+              <a href="/aviso-privacidad" className="text-blue-400">
                 Aviso de Privacidad
               </a>
             </label>
