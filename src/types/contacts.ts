@@ -4,8 +4,8 @@ export interface Contact {
   email: string;
   phone: string;
   message: string;
-  status: 'No Atendido' | 'En Espera' | 'Atendido' | 'Enviado';
-  priority: 'low' | 'medium' | 'high';
+  status: "No Atendido" | "En Espera" | "Atendido" | "Enviado";
+  priority: "low" | "medium" | "high";
   source: string;
   assigned_to?: number;
   assigned_username?: string;
@@ -38,21 +38,21 @@ export interface ContactQueryParams {
   priority?: string;
   assigned_to?: number;
   sortBy?: string;
-  sortOrder?: 'ASC' | 'DESC';
+  sortOrder?: "ASC" | "DESC";
 }
 
 export interface DashboardStats {
   totalContacts: number;
   contactsByStatus: {
-    'No Atendido': number;
-    'En Espera': number;
-    'Atendido': number;
-    'Enviado': number;
+    "No Atendido": number;
+    "En Espera": number;
+    Atendido: number;
+    Enviado: number;
   };
   contactsByPriority: {
-    'low': number;
-    'medium': number;
-    'high': number;
+    low: number;
+    medium: number;
+    high: number;
   };
   recentContacts: Contact[];
   monthlyStats: Array<{
@@ -66,7 +66,6 @@ export interface ContactCreateData {
   email: string;
   phone: string;
   message: string;
-  recaptcha: string;
 }
 
 export interface ContactUpdateData {
@@ -99,7 +98,7 @@ export interface User {
   username: string;
   email: string;
   password_hash?: string;
-  role: 'admin' | 'manager' | 'agent';
+  role: "admin" | "manager" | "agent";
   is_active: boolean;
   created_at?: string;
   updated_at?: string;

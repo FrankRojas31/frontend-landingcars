@@ -15,6 +15,20 @@ const LoginView = () => {
   const { login, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  const mockEmails = [
+    "admin@titanmotors.mx",
+    "manager@titanmotors.mx",
+    "agent@titanmotors.mx",
+  ];
+
+  const handleSelectEmail = (email: string) => {
+    setCredentials((prev) => ({
+      ...prev,
+      username: email,
+      password: "password123",
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -118,6 +132,28 @@ const LoginView = () => {
           className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-2xl"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Quick Select Email */}
+            <div>
+              <label
+                htmlFor="quickSelect"
+                className="block text-sm font-medium text-gray-200 mb-2"
+              >
+                Correos de Demostración
+              </label>
+              <select
+                id="quickSelect"
+                onChange={(e) => handleSelectEmail(e.target.value)}
+                className="block w-full px-3 py-3 border border-white/20 rounded-xl bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+              >
+                <option value="">Selecciona un correo...</option>
+                {mockEmails.map((email) => (
+                  <option key={email} value={email}>
+                    {email}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Email Field */}
             <div>
               <label

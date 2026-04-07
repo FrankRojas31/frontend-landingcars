@@ -1,5 +1,4 @@
-import { useState, useRef } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
+import { useState } from "react";
 import { contactService } from "../../../services/api.service";
 import Swal from "sweetalert2";
 import DOMPurify from "dompurify";
@@ -10,7 +9,6 @@ interface ContactForm {
   phone: string;
   message: string;
   condiciones?: boolean;
-  recaptcha: string;
 }
 
 interface TouchedFields {
@@ -19,17 +17,14 @@ interface TouchedFields {
   phone?: boolean;
   message?: boolean;
   condiciones?: boolean;
-  recaptcha?: boolean;
 }
 
 export default function ContactFormComponent() {
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [form, setForm] = useState<ContactForm>({
     fullName: "",
     email: "",
     phone: "",
     message: "",
-    recaptcha: "",
   });
   const [touched, setTouched] = useState<TouchedFields>({});
 
@@ -44,7 +39,6 @@ export default function ContactFormComponent() {
     phone: !/^\d{10}$/.test(form.phone),
     message: form.message.trim().length < 10 || form.message.length > 1000,
     condiciones: !form.condiciones,
-    recaptcha: !form.recaptcha,
   };
 
   const isValid = Object.values(errors).every((v) => v === false);
@@ -54,7 +48,7 @@ export default function ContactFormComponent() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value, type } = e.target;
     if (type === "checkbox") {
@@ -77,17 +71,12 @@ export default function ContactFormComponent() {
   };
 
   const handleBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setTouched((prev) => ({
       ...prev,
       [e.target.name]: true,
     }));
-  };
-
-  const handleRecaptcha = (token: string | null) => {
-    setForm((prev) => ({ ...prev, recaptcha: token || "" }));
-    setTouched((prev) => ({ ...prev, recaptcha: true }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,7 +87,6 @@ export default function ContactFormComponent() {
       phone: true,
       message: true,
       condiciones: true,
-      recaptcha: true,
     });
 
     if (isValid) {
@@ -108,7 +96,6 @@ export default function ContactFormComponent() {
           email: sanitizeInput(form.email),
           phone: sanitizeInput(form.phone),
           message: sanitizeInput(form.message),
-          recaptcha: form.recaptcha,
         };
 
         await contactService.submitContact(sanitizedForm);
@@ -126,12 +113,8 @@ export default function ContactFormComponent() {
           phone: "",
           message: "",
           condiciones: false,
-          recaptcha: "",
         });
         setTouched({});
-        if (recaptchaRef.current) {
-          recaptchaRef.current.reset();
-        }
       } catch (err) {
         Swal.fire({
           icon: "error",
@@ -288,18 +271,6 @@ export default function ContactFormComponent() {
             {touched.condiciones && errors.condiciones && (
               <div className="text-red-500 text-sm mt-2">
                 Debes aceptar los términos y condiciones.
-              </div>
-            )}
-          </div>
-          <div className="grid justify-center">
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              sitekey="6Ld8Z2srAAAAAC-LdwLTVr7JYf74B8DU44jzKkoM"
-              onChange={handleRecaptcha}
-            />
-            {touched.recaptcha && errors.recaptcha && (
-              <div className="text-red-500 text-sm mt-2">
-                Debes completar el reCAPTCHA.
               </div>
             )}
           </div>
