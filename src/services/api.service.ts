@@ -234,7 +234,7 @@ class AuthService {
 
 class ContactService {
   async submitContact(
-    formData: ContactFormData,
+    _formData: ContactFormData,
   ): Promise<{ success: boolean; message: string }> {
     // Mock response
     return Promise.resolve({
@@ -243,7 +243,7 @@ class ContactService {
     });
   }
 
-  async getContacts(params?: ContactQueryParams): Promise<ContactResponse> {
+  async getContacts(_params?: ContactQueryParams): Promise<ContactResponse> {
     // Mock response
     const mockContacts: Contact[] = [
       {
@@ -284,7 +284,7 @@ class ContactService {
     });
   }
 
-  async getMyContacts(params?: ContactQueryParams): Promise<ContactResponse> {
+  async getMyContacts(_params?: ContactQueryParams): Promise<ContactResponse> {
     // Mock response
     const mockContacts: Contact[] = [
       {
@@ -339,7 +339,9 @@ class ContactService {
       email: "juan@example.com",
       phone: "5512345678",
       message: "Interesado en camioneta tipo pickup",
-      status: data.status || "No Atendido",
+      status:
+        (data.status as "No Atendido" | "En Espera" | "Atendido" | "Enviado") ||
+        "No Atendido",
       priority: (data.priority as any) || "high",
       source: "website",
       notes: data.notes,
@@ -497,20 +499,30 @@ class MessagesService {
     const mockMessages: Message[] = [
       {
         id: 1,
-        contact_id: contactId,
-        sender_type: "client",
+        contactId: contactId,
+        contact: {
+          id: contactId,
+          fullName: "Juan Pérez",
+          email: "juan@example.com",
+        },
         content:
           "Hola, quisiera saber más sobre las opciones de financiamiento",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        isRead: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       {
         id: 2,
-        contact_id: contactId,
-        sender_type: "agent",
+        contactId: contactId,
+        contact: {
+          id: contactId,
+          fullName: "Juan Pérez",
+          email: "juan@example.com",
+        },
         content: "Claro, tenemos varias opciones disponibles",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        isRead: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     ];
     return Promise.resolve(mockMessages);
@@ -520,16 +532,21 @@ class MessagesService {
     // Mock response
     return Promise.resolve({
       id: Math.floor(Math.random() * 1000),
-      contact_id: contactId,
-      sender_type: "agent",
+      contactId: contactId,
+      contact: {
+        id: contactId,
+        fullName: "Juan Pérez",
+        email: "juan@example.com",
+      },
       content: message,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
   }
 
   async markAsRead(
-    contactId: number,
+    _contactId: number,
   ): Promise<{ success: boolean; message: string }> {
     // Mock response
     return Promise.resolve({
@@ -542,16 +559,21 @@ class MessagesService {
     // Mock response
     return Promise.resolve({
       id,
-      contact_id: 1,
-      sender_type: "agent",
+      contactId: 1,
+      contact: {
+        id: 1,
+        fullName: "Juan Pérez",
+        email: "juan@example.com",
+      },
       content: message,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
   }
 
   async deleteMessage(
-    id: number,
+    _id: number,
   ): Promise<{ success: boolean; message: string }> {
     // Mock response
     return Promise.resolve({
